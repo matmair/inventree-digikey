@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools", "wheel", "pyyaml"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "inventree-digikey"
+version =  "0.0.4a4"
+description="Digikey integration for InvenTree"
+readme = "README.md"
+license = {text = "MIT"}
+keywords = ["inventree", "inventree-plugin", "digikey"]
+authors = [
+    {name = "Matthias J Mair", email =  "info@mjmair.com"}
+]
+classifiers=[
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+    "Environment :: Plugins",
+    "Framework :: Django",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Manufacturing",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Scientific/Engineering",
+]
+requires-python=">=3.6"
+dependencies = ['requests', 'django']
+
+[project.optional-dependencies]
+dev = ['twine', 'setuptools']
+
+[project.urls]
+repository = "https://github.com/matmair/inventree-digikey"
+"Bug Tracker" = "https://github.com/matmair/inventree-digikey/issues"
+
+[project.entry-points."inventree_plugins"]
+inventree-digikey = "inventree_digikey:digikey.DigikeyPlugin"
+
+[tool.setuptools.packages.find]
+where = ["src"]
