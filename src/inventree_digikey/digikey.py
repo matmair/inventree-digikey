@@ -189,10 +189,9 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
         # TODO send notification
         pass
 
-    def digikey_search_settings(self, keyword, records: int = 10):
+    def digikey_search_settings(self, records: int = 10):
         """Returns search settings for digikey api."""
         return {
-            "Keywords": keyword,
             "RecordCount": records,
             "RecordStartPosition": 0,
             "Filters": {
@@ -233,7 +232,7 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
         response = self.api_call(
             f'{self.DIGI_URL_BASE}/Search/v3/Products/Keyword?includes={term}',
             method='POST',
-            data=self.digikey_search_settings(term),
+            data=self.digikey_search_settings().update({"Keywords": term}),
             headers=self.digikey_headers(),
             endpoint_is_url=True,
         )
