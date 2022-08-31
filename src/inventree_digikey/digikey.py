@@ -9,12 +9,12 @@ from django.shortcuts import redirect
 from django.urls import re_path
 from django.utils.http import urlquote_plus
 from django.utils.translation import gettext_lazy as _
-
 from InvenTree.permissions import login_exempt
 from InvenTree.tasks import offload_task
 from plugin import InvenTreePlugin
-from plugin.base.supplier.mixins import (SearchResult, SearchRunResult,)
-from plugin.mixins import SettingsMixin, UrlsMixin, APICallMixin, AppMixin, SupplierMixin
+from plugin.base.supplier.mixins import SearchResult, SearchRunResult
+from plugin.mixins import (APICallMixin, AppMixin, SettingsMixin,
+                           SupplierMixin, UrlsMixin)
 
 
 class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMixin, InvenTreePlugin):
