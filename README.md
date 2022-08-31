@@ -1,3 +1,3 @@
 # inventree-digikey
 
-Digieky integration for InvenTree.
+Digikey Integration for InvenTree.
