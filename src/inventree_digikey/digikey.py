@@ -243,6 +243,6 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
         def retrun_result(data):
             return SearchRunResult(term=term, exact=exact, safe_results=safe_results, results=data)
 
-        self.digikey_api_keyword(term)
+        results = self.digikey_api_keyword(term)
 
         return retrun_result(results)
