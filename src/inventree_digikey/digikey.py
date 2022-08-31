@@ -18,6 +18,7 @@ from plugin.mixins import (APICallMixin, AppMixin, SettingsMixin,
 
 
 class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMixin, InvenTreePlugin):
+    """Plugin to integrate Digikey APIs into InvenTree."""
 
     NAME = "Digikey Supplier Integration"
     SLUG = "digikey"
@@ -103,7 +104,10 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
     }
     STD_CONNECTION = 'digikey_account'
 
+    # Connection details
+    # TODO move out
     def get_con(self, key: str, ref: str = None, default=None):
+        """Get webconnection setting data."""
         def ret_default(val):
             if not val and default:
                 return default
@@ -117,6 +121,7 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
         return ret_default(ret)
 
     def set_con(self, key: str, val, ref: str = None):
+        """Set webconnection setting data."""
         ref = ref if ref else self.STD_CONNECTION
         qs = self.db.webconnections.filter(connection_key=ref)
         if len(qs) > 1:
@@ -127,10 +132,12 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
 
     # oauth functions
     def get_redirect_url(self):
+        """Returns OAuth redirection urls."""
         site_url = Site.objects.all().order_by('id').first()
         return f'{site_url.domain}/{self.base_url}digikey_callback/'
 
     def get_token(self, code):
+        """Fetch token from digikey and save it to connection."""
         response = self.api_call(
             self.DIGI_AUTH_TOKEN, method='POST',
             data={
@@ -178,10 +185,12 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
 
     # ui interaction
     def raise_aut_error(self, msg):
+        """Raise an authentication error to the user."""
         # TODO send notification
         pass
 
     def digikey_search_settings(self, keyword, records: int = 10):
+        """Returns search settings for digikey api."""
         return {
             "Keywords": keyword,
             "RecordCount": records,
@@ -201,6 +210,7 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
         }
 
     def digikey_headers(self):
+        """Returns default part headers for digikey."""
         code = json.loads(self.get_con('RESPONSE', default={})).get('access_token')
         return {
             'Authorization': f'Bearer {code}',
@@ -213,6 +223,7 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
         }
 
     def digikey_api_keyword(self, term):
+        """Fetches search results form the keyword API."""
         # Check if we are authenticated - pass if not
         if not self.get_con('AUTHENTICATED'):
             self.raise_aut_error()
@@ -240,6 +251,7 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
         return results
 
     def search_action(self, term: str, exact: bool = False, safe_results: bool = True) -> SearchRunResult:
+        """Runs search again supplier API."""
         def retrun_result(data):
             return SearchRunResult(term=term, exact=exact, safe_results=safe_results, results=data)
 
