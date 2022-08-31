@@ -12,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from InvenTree.permissions import login_exempt
 from InvenTree.tasks import offload_task
 from plugin import InvenTreePlugin
-from plugin.base.supplier.mixins import SearchResult, SearchRunResult
+from plugin.base.supplier.mixins import SearchRunResult  # SearchResult
 from plugin.mixins import (APICallMixin, AppMixin, SettingsMixin,
                            SupplierMixin, UrlsMixin)
 
@@ -47,11 +47,11 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
         },
     }
 
-    CONNECTIONS= {
+    CONNECTIONS = {
         'digikey_account': WebConnectionData(
             name='DigiKey Account',
             description=_('Account that should be used to access the digikey API'),
-            settings= {
+            settings={
                 'DIGI_CLIENT_ID': {
                     'name': _('API Key'),
                     'description': _('Key required for accessing external API'),
@@ -138,7 +138,7 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
                 'client_id': self.get_con('DIGI_CLIENT_ID'),
                 'client_secret': self.get_con('DIGI_CLIENT_SECRET'),
                 'redirect_uri': self.get_redirect_url(),
-                'grant_type':'authorization_code',
+                'grant_type': 'authorization_code',
             },
             headers={'Content-Type': 'application/x-www-form-urlencoded'},
             endpoint_is_url=True, json_data=False
