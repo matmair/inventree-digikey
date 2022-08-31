@@ -1,25 +1,25 @@
 """Sample implementations for IntegrationPlugin."""
 
+import json
+import site
 from dataclasses import dataclass
 from email import header
 from functools import reduce
-import json
-import site
-from django.http import HttpResponse
+
+from common.models import WebConnectionData
+from django.contrib.sites.models import Site
+from django.http import Http404, HttpResponse
+from django.shortcuts import redirect
 from django.urls import include, re_path
+from django.utils.http import urlquote_plus
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.csrf import csrf_exempt
 from InvenTree.permissions import login_exempt
 from InvenTree.tasks import offload_task
-from common.models import WebConnectionData
-from django.utils.http import urlquote_plus
-from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import redirect
-from django.http import Http404
-from django.contrib.sites.models import Site
-
 from plugin import InvenTreePlugin
 from plugin.base.integration.mixins import APICallMixin, AppMixin
-from plugin.base.supplier.mixins import SearchResult, SupplierMixin, SearchRunResult
+from plugin.base.supplier.mixins import (SearchResult, SearchRunResult,
+                                         SupplierMixin)
 from plugin.mixins import SettingsMixin, UrlsMixin
 
 
