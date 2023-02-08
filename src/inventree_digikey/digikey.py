@@ -24,9 +24,9 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
     SLUG = "digikey"
     TITLE = "Digikey integration"
 
-    DIGI_AUTH_URL = 'https://sandbox-api.digikey.com/v1/oauth2/authorize'
-    DIGI_AUTH_TOKEN = 'https://sandbox-api.digikey.com/v1/oauth2/token'
-    DIGI_URL_BASE = 'https://sandbox-api.digikey.com'
+    DIGI_AUTH_URL = 'https://api.digikey.com/v1/oauth2/authorize'
+    DIGI_AUTH_TOKEN = 'https://api.digikey.com/v1/oauth2/token'
+    DIGI_URL_BASE = 'https://api.digikey.com'
 
     SETTINGS = {
         'SEARCH_ENABLED': {
