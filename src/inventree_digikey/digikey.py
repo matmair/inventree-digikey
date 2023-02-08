@@ -104,32 +104,6 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
     }
     STD_CONNECTION = 'digikey_account'
 
-    # Connection details
-    # TODO move out
-    def get_con(self, key: str, ref: str = None, default=None):
-        """Get webconnection setting data."""
-        def ret_default(val):
-            if not val and default:
-                return default
-            return val
-
-        ref = ref if ref else self.STD_CONNECTION
-        qs = self.db.webconnections.filter(connection_key=ref)
-        ret = [a.settings.get(key=key).value for a in qs]
-        if len(ret) == 1:
-            return ret_default(ret[0])
-        return ret_default(ret)
-
-    def set_con(self, key: str, val, ref: str = None):
-        """Set webconnection setting data."""
-        ref = ref if ref else self.STD_CONNECTION
-        qs = self.db.webconnections.filter(connection_key=ref)
-        if len(qs) > 1:
-            raise NotImplementedError('This function is not implemented!')
-        setting = qs[0].settings.get(key=key)
-        setting.value = val
-        setting.save()
-
     # oauth functions
     def get_redirect_url(self):
         """Returns OAuth redirection urls."""
