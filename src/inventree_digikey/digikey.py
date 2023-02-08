@@ -215,11 +215,11 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
         )
 
         # Check response
-        if 'ErrorMessage' in response:
-            if response.get('StatusCode') == 401 and response.get('ErrorMessage') == 'Bearer token  expired':
+        if response.status_code != 200:
+            if response.status_code == 401 and response.json().get('ErrorMessage') == 'Bearer token  expired':
                 self.raise_auth_error('Token has expired')
                 return None
-            raise ValueError(_('An error occured while fetching the data.'), response)
+            raise ValueError(_('An error occured while fetching the data.'), response.content)
 
         # TODO parse results
         results = response
