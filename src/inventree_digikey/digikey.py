@@ -186,6 +186,7 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
     # ui interaction
     def raise_aut_error(self, msg):
         """Raise an authentication error to the user."""
+        print('Authentication error occured!\n{msg}')
         # TODO send notification
         pass
 
@@ -225,7 +226,7 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
         """Fetches search results form the keyword API."""
         # Check if we are authenticated - pass if not
         if not self.get_con('AUTHENTICATED'):
-            self.raise_aut_error()
+            self.raise_aut_error('Connection not authenticated')
             return None
 
         # Get data
@@ -240,7 +241,7 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
         # Check response
         if 'ErrorMessage' in response:
             if response.get('StatusCode') == 401 and response.get('ErrorMessage') == 'Bearer token  expired':
-                self.raise_aut_error()
+                self.raise_aut_error('Token has expired')
                 return None
             raise ValueError(_('An error occured while fetching the data.'), response)
 
