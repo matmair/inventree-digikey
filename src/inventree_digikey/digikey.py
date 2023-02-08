@@ -9,7 +9,7 @@ from django.shortcuts import redirect
 from django.urls import re_path
 from django.utils.http import urlquote_plus
 from django.utils.translation import gettext_lazy as _
-from InvenTree.permissions import login_exempt
+from InvenTree.permissions import auth_exempt
 from InvenTree.tasks import offload_task
 from plugin import InvenTreePlugin
 from plugin.base.supplier.mixins import SearchRunResult  # SearchResult
@@ -161,7 +161,7 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
             pass
 
     # views
-    @login_exempt
+    @auth_exempt
     def view_callback(self, request):
         """Callback for oauth setup."""
         code = request.GET.get('code')
