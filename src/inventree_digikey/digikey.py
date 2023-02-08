@@ -122,7 +122,7 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
                 'grant_type': 'authorization_code',
             },
             headers={'Content-Type': 'application/x-www-form-urlencoded'},
-            endpoint_is_url=True, json_data=False
+            endpoint_is_url=True
         )
 
         if response.get('access_token'):
