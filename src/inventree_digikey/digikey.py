@@ -158,7 +158,7 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
         ]
 
     # ui interaction
-    def raise_aut_error(self, msg):
+    def raise_auth_error(self, msg):
         """Raise an authentication error to the user."""
         print('Authentication error occured!\n{msg}')
         # TODO send notification
@@ -200,7 +200,7 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
         """Fetches search results form the keyword API."""
         # Check if we are authenticated - pass if not
         if not self.get_con('AUTHENTICATED'):
-            self.raise_aut_error('Connection not authenticated')
+            self.raise_auth_error('Connection not authenticated')
             return None
 
         # Get data
@@ -215,7 +215,7 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
         # Check response
         if 'ErrorMessage' in response:
             if response.get('StatusCode') == 401 and response.get('ErrorMessage') == 'Bearer token  expired':
-                self.raise_aut_error('Token has expired')
+                self.raise_auth_error('Token has expired')
                 return None
             raise ValueError(_('An error occured while fetching the data.'), response)
 
@@ -226,9 +226,9 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
 
     def search_action(self, term: str, exact: bool = False, safe_results: bool = True) -> SearchRunResult:
         """Runs search again supplier API."""
-        def retrun_result(data):
+        def return_result(data):
             return SearchRunResult(term=term, exact=exact, safe_results=safe_results, results=data)
 
         results = self.digikey_api_keyword(term)
 
-        return retrun_result(results)
+        return return_result(results)
