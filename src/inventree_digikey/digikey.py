@@ -204,12 +204,14 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
             return None
 
         # Get data
+        data = self.digikey_search_settings()
+        data.update({"Keywords": term})
         response = self.api_call(
             f'{self.DIGI_URL_BASE}/Search/v3/Products/Keyword?includes={term}',
             method='POST',
-            data=self.digikey_search_settings().update({"Keywords": term}),
+            json=data,
             headers=self.digikey_headers(),
-            endpoint_is_url=True,
+            endpoint_is_url=True, simple_response=False
         )
 
         # Check response
