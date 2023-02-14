@@ -15,7 +15,6 @@ from plugin import InvenTreePlugin
 from plugin.base.supplier.mixins import SearchRunResult  # SearchResult
 from plugin.mixins import (APICallMixin, AppMixin, SettingsMixin,
                            SupplierMixin, UrlsMixin)
-from part.models import PartCategory
 
 
 class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMixin, InvenTreePlugin):
@@ -256,6 +255,6 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
         """Runs search again supplier API."""
         return SearchRunResult(term=term, exact=exact, safe_results=safe_results, results=self.digikey_api_keyword(term))
 
-    def import_part(self, term: str, category: PartCategory) -> bool:
+    def import_part(self, term: str, category) -> bool:
         """Tries to import a part by term. Returns bool if import was successfull."""
         return bool(self.digikey_api_part_detail(term=term, category=category))
