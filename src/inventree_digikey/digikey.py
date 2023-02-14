@@ -201,6 +201,13 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
             self.raise_auth_error('Connection not authenticated')
             return None
 
+    def check_resp(self, response):
+        if response.status_code != 200:
+            if response.status_code == 401 and response.json().get('ErrorMessage') == 'Bearer token  expired':
+                self.raise_auth_error('Token has expired')
+                return None
+            raise ValueError(_('An error occured while fetching the data.'), response.content)
+
     def digikey_api_keyword(self, term):
         """Fetches search results form the keyword API."""
         self.check_auth()
@@ -215,13 +222,7 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
             headers=self.digikey_headers(),
             endpoint_is_url=True, simple_response=False
         )
-
-        # Check response
-        if response.status_code != 200:
-            if response.status_code == 401 and response.json().get('ErrorMessage') == 'Bearer token  expired':
-                self.raise_auth_error('Token has expired')
-                return None
-            raise ValueError(_('An error occured while fetching the data.'), response.content)
+        self.check_resp(response=response)
 
         # TODO parse results
         results = response.json()
@@ -242,13 +243,7 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
             headers=self.digikey_headers(),
             endpoint_is_url=True, simple_response=False
         )
-
-        # Check response
-        if response.status_code != 200:
-            if response.status_code == 401 and response.json().get('ErrorMessage') == 'Bearer token  expired':
-                self.raise_auth_error('Token has expired')
-                return None
-            raise ValueError(_('An error occured while fetching the data.'), response.content)
+        self.check_resp(response=response)
 
         # TODO parse results
         results = response.json()
