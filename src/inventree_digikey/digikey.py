@@ -234,13 +234,12 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
         self.check_auth()
 
         # Get data
-        data = self.digikey_search_settings()
-        data.update({"Keywords": term})
+        data = self.digikey_headers()
+        data.update({"digiKeyPartNumber": term})
         response = self.api_call(
-            f'{self.DIGI_URL_BASE}/Search/v3/Products/Keyword?includes={term}',
-            method='POST',
-            json=data,
-            headers=self.digikey_headers(),
+            f'{self.DIGI_URL_BASE}/Search/v3/Products/{term}',
+            method='GET',
+            headers=data,
             endpoint_is_url=True, simple_response=False
         )
         self.check_resp(response=response)
