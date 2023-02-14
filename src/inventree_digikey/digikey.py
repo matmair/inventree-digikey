@@ -254,13 +254,8 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
     # -------------------------------------- #
     def search_action(self, term: str, exact: bool = False, safe_results: bool = True) -> SearchRunResult:
         """Runs search again supplier API."""
-        results = self.digikey_api_keyword(term)
-        return SearchRunResult(term=term, exact=exact, safe_results=safe_results, results=results)
+        return SearchRunResult(term=term, exact=exact, safe_results=safe_results, results=self.digikey_api_keyword(term))
 
     def import_part(self, term: str, category: PartCategory) -> bool:
-        """Tries to import a part by term.
-
-        Returns bool if import was successfull.
-        """
-        result = self.digikey_api_part_detail(term=term, category=category)
-        return bool(result)
+        """Tries to import a part by term. Returns bool if import was successfull."""
+        return bool(self.digikey_api_part_detail(term=term, category=category))
