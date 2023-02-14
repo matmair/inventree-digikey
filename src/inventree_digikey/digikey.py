@@ -195,12 +195,15 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
             'Content-Type': 'application/json'
         }
 
-    def digikey_api_keyword(self, term):
-        """Fetches search results form the keyword API."""
+    def check_auth(self):
         # Check if we are authenticated - pass if not
         if not self.get_con('AUTHENTICATED'):
             self.raise_auth_error('Connection not authenticated')
             return None
+
+    def digikey_api_keyword(self, term):
+        """Fetches search results form the keyword API."""
+        self.check_auth()
 
         # Get data
         data = self.digikey_search_settings()
@@ -227,10 +230,7 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
 
     def digikey_api_part_detail(self, term, category):
         """Fetches part from the PartDetail API."""
-        # Check if we are authenticated - pass if not
-        if not self.get_con('AUTHENTICATED'):
-            self.raise_auth_error('Connection not authenticated')
-            return None
+        self.check_auth()
 
         # Get data
         data = self.digikey_search_settings()
