@@ -13,11 +13,11 @@ from InvenTree.permissions import auth_exempt
 from InvenTree.tasks import offload_task
 from plugin import InvenTreePlugin
 from plugin.base.supplier.mixins import SearchRunResult  # SearchResult
-from plugin.mixins import (APICallMixin, AppMixin, SettingsMixin,
+from plugin.mixins import (APICallMixin, SettingsMixin,
                            SupplierMixin, UrlsMixin)
 
 
-class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMixin, InvenTreePlugin):
+class DigikeyPlugin(APICallMixin, SupplierMixin, SettingsMixin, UrlsMixin, InvenTreePlugin):
     """Plugin to integrate Digikey APIs into InvenTree."""
 
     NAME = "Digikey Supplier Integration"
