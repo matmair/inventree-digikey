@@ -195,22 +195,22 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
             'Content-Type': 'application/json'
         }
 
-    def check_auth(self):
+    def digikey_check_auth(self):
         # Check if we are authenticated - pass if not
         if not self.get_con('AUTHENTICATED'):
+            # TODO @matmair try reauth
             self.raise_auth_error('Connection not authenticated')
-            return None
 
-    def check_resp(self, response):
+    def digikey_check_resp(self, response):
         if response.status_code != 200:
             if response.status_code == 401 and response.json().get('ErrorMessage') == 'Bearer token  expired':
+                # TODO @matmair try reauth
                 self.raise_auth_error('Token has expired')
-                return None
             raise ValueError(_('An error occured while fetching the data.'), response.content)
 
     def digikey_api_keyword(self, term):
         """Fetches search results form the keyword API."""
-        self.check_auth()
+        self.digikey_check_auth()
 
         # Get data
         data = self.digikey_search_settings()
@@ -222,7 +222,7 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
             headers=self.digikey_headers(),
             endpoint_is_url=True, simple_response=False
         )
-        self.check_resp(response=response)
+        self.digikey_check_resp(response=response)
 
         # TODO parse results
         results = response.json()
@@ -231,7 +231,7 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
 
     def digikey_api_part_detail(self, term, category):
         """Fetches part from the PartDetail API."""
-        self.check_auth()
+        self.digikey_check_auth()
 
         # Get data
         data = self.digikey_headers()
@@ -242,7 +242,7 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
             headers=data,
             endpoint_is_url=True, simple_response=False
         )
-        self.check_resp(response=response)
+        self.digikey_check_resp(response=response)
 
         # TODO parse results
         results = response.json()
