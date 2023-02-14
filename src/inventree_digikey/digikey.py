@@ -15,6 +15,7 @@ from plugin import InvenTreePlugin
 from plugin.base.supplier.mixins import SearchRunResult  # SearchResult
 from plugin.mixins import (APICallMixin, AppMixin, SettingsMixin,
                            SupplierMixin, UrlsMixin)
+from part.models import PartCategory
 
 
 class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMixin, InvenTreePlugin):
@@ -160,9 +161,7 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
     # ui interaction
     def raise_auth_error(self, msg):
         """Raise an authentication error to the user."""
-        print('Authentication error occured!\n{msg}')
-        # TODO send notification
-        pass
+        raise PermissionError(f'Authentication error occured!\n{msg}')
 
     def digikey_search_settings(self, records: int = 10):
         """Returns search settings for digikey api."""
@@ -222,15 +221,52 @@ class DigikeyPlugin(APICallMixin, AppMixin, SupplierMixin, SettingsMixin, UrlsMi
             raise ValueError(_('An error occured while fetching the data.'), response.content)
 
         # TODO parse results
-        results = response
+        results = response.json()
 
         return results
 
+    def digikey_api_part_detail(self, term, category):
+        """Fetches part from the PartDetail API."""
+        # Check if we are authenticated - pass if not
+        if not self.get_con('AUTHENTICATED'):
+            self.raise_auth_error('Connection not authenticated')
+            return None
+
+        # Get data
+        data = self.digikey_search_settings()
+        data.update({"Keywords": term})
+        response = self.api_call(
+            f'{self.DIGI_URL_BASE}/Search/v3/Products/Keyword?includes={term}',
+            method='POST',
+            json=data,
+            headers=self.digikey_headers(),
+            endpoint_is_url=True, simple_response=False
+        )
+
+        # Check response
+        if response.status_code != 200:
+            if response.status_code == 401 and response.json().get('ErrorMessage') == 'Bearer token  expired':
+                self.raise_auth_error('Token has expired')
+                return None
+            raise ValueError(_('An error occured while fetching the data.'), response.content)
+
+        # TODO parse results
+        results = response.json()
+
+        return results
+
+    # -------------------------------------- #
+    # mixin: supplier
+    # -------------------------------------- #
     def search_action(self, term: str, exact: bool = False, safe_results: bool = True) -> SearchRunResult:
         """Runs search again supplier API."""
-        def return_result(data):
-            return SearchRunResult(term=term, exact=exact, safe_results=safe_results, results=data)
-
         results = self.digikey_api_keyword(term)
+        return SearchRunResult(term=term, exact=exact, safe_results=safe_results, results=results)
 
-        return return_result(results)
+    def import_part(self, term: str, category: PartCategory) -> bool:
+        """Tries to import a part by term.
+
+        Returns bool if import was successfull.
+        """
+        result = self.digikey_api_part_detail(term=term, category=category)
+        return bool(result)
