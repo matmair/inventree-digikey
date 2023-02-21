@@ -8,13 +8,16 @@ from django.http import Http404
 from django.shortcuts import redirect
 from django.urls import re_path
 from django.utils.http import urlquote_plus
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, gettext_lazy
 from InvenTree.permissions import auth_exempt
 from InvenTree.tasks import offload_task
 from plugin import InvenTreePlugin
 from plugin.base.supplier.mixins import SearchRunResult  # SearchResult
 from plugin.mixins import (APICallMixin, SettingsMixin,
                            SupplierMixin, UrlsMixin)
+from part.models import Part
+from company.models import Company, SupplierPart, ManufacturerPart
+from common.notifications import trigger_notification
 
 
 class DigikeyPlugin(APICallMixin, SupplierMixin, SettingsMixin, UrlsMixin, InvenTreePlugin):
@@ -228,7 +231,69 @@ class DigikeyPlugin(APICallMixin, SupplierMixin, SettingsMixin, UrlsMixin, Inven
 
         return results
 
-    def digikey_api_part_detail(self, term, category):
+    def digikey_add_part(self, data, category, user):
+        """Create part from supplied data."""
+
+        # Add part
+        new_part, _ = Part.objects.get_or_create(
+            name=data['ProductDescription'],
+            description=data['DetailedDescription'],
+            purchaseable=True,
+            category=category,
+            keywords=data['LimitedTaxonomy']['Value'],
+            link=data['ProductUrl'],
+        )
+
+        # Add media files
+        # TODO @matmair add function
+
+        # Add manufacturer part
+        mft, _ = Company.objects.get_or_create(name=data['Supplier'], is_manufacturer=True)
+        mft_part, _ = ManufacturerPart.objects.get_or_create(
+            part=new_part,
+            manufacturer=mft,
+            MPN=data['ManufacturerPartNumber'],
+            link=data['ProductUrl'],
+        )
+
+        # Add supplier part
+        supplier, _ = Company.objects.get_or_create(name='Digikey', is_supplier=True)
+        supplier_part, _ = SupplierPart.objects.get_or_create(
+            part=new_part,
+            manufacturer_part=mft_part,
+            supplier=supplier,
+            SKU=data['DigiKeyPartNumber'],
+            link=data['ProductUrl'],
+            available=data['QuantityAvailable'],
+        )
+
+        # Clear cost
+        supplier_part.price_breaks.delete()
+        # And add the points
+        for pricepoint in data['StandardPricing']:
+            supplier_part.pricebreaks.create(
+                quantity=pricepoint['BreakQuantity'],
+                price=pricepoint['UnitPrice']
+            )
+
+        # Add default supplier
+        new_part.default_supplier = supplier_part
+        new_part.save()
+
+        # Send notification
+        trigger_notification(
+            new_part,
+            'supplier.import',
+            context={
+                'name': gettext_lazy('Part imported or updates'),
+                'message': gettext_lazy('The Part was imported or updated by the Digikey plugin'),
+            },
+            targets=[user],
+        )
+
+        return new_part
+
+    def digikey_api_part_detail(self, term, category, user):
         """Fetches part from the PartDetail API."""
         self._check_auth()
 
@@ -243,10 +308,7 @@ class DigikeyPlugin(APICallMixin, SupplierMixin, SettingsMixin, UrlsMixin, Inven
         )
         self._check_resp(response=response)
 
-        # TODO parse results
-        results = response.json()
-
-        return results
+        return self.digikey_add_part(response.json(), category=category, user=user)
 
     # -------------------------------------- #
     # mixin: supplier
@@ -255,6 +317,6 @@ class DigikeyPlugin(APICallMixin, SupplierMixin, SettingsMixin, UrlsMixin, Inven
         """Runs search again supplier API."""
         return SearchRunResult(term=term, exact=exact, safe_results=safe_results, results=self.digikey_api_keyword(term))
 
-    def import_part(self, term: str, category) -> bool:
+    def import_part(self, term: str, category, user) -> bool:
         """Tries to import a part by term. Returns bool if import was successfull."""
-        return bool(self.digikey_api_part_detail(term=term, category=category))
+        return bool(self.digikey_api_part_detail(term=term, category=category, user=user))
