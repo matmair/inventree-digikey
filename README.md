@@ -1,3 +1,5 @@
 # inventree-digikey
 
-Digieky integration for InvenTree.
+Digikey Integration for InvenTree.
+
+Sandbox apps https://developer.digikey.com/user/apps
